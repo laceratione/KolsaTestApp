@@ -28,6 +28,7 @@ class WorkoutListViewModel @Inject constructor(
         private set
 
     init {
+        Log.d(TAG, "Init view model")
         loadWorkouts()
     }
 

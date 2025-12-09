@@ -5,6 +5,7 @@ import android.util.Log
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.PlaybackParameters
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 
 private const val TAG = "VideoPlayerManager"
@@ -15,6 +16,12 @@ class VideoPlayerManager(
     private var exoPlayer: ExoPlayer? = null
     private var trackSelector: DefaultTrackSelector? = null
 
+    var isPlayingBeforeConfigChange = false
+        private set
+
+    var isPausedByUser: Boolean = false
+        private set
+
     fun init(): ExoPlayer {
         if (exoPlayer != null) return exoPlayer!!
 
@@ -23,7 +30,21 @@ class VideoPlayerManager(
             .setTrackSelector(trackSelector!!)
             .build()
 
-        return exoPlayer!!
+
+        return exoPlayer!!.apply {
+            Log.d(TAG, "Player.Listener init")
+//            addListener(object : Player.Listener {
+//                override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+//                    if (!playWhenReady) {
+//                        // Пауза
+//                        isPausedByUser = true
+//                    } else {
+//                        // Воспроизведение
+//                        isPausedByUser = false
+//                    }
+//                }
+//            })
+        }
     }
 
     fun getPlayer(): ExoPlayer? = exoPlayer
@@ -48,6 +69,8 @@ class VideoPlayerManager(
 
     fun pause() {
         try {
+            isPlayingBeforeConfigChange = exoPlayer?.isPlaying == true
+//            isPausedByUser = false
             if (exoPlayer?.isPlaying == true)
                 exoPlayer?.pause()
         } catch (e: Exception) {
@@ -55,11 +78,29 @@ class VideoPlayerManager(
         }
     }
 
+    /*
+    при сворачивании пауза, при возвращении пауза
+    при смене конф после возвращения пауза, если юзер паузил
+                                     плей, если юзер не паузил
+     */
     fun play() {
         try {
-            exoPlayer?.play()
-        } catch (e: Exception){
+            if (isPlayingBeforeConfigChange && !isPausedByUser){
+//                isPausedByUser = false
+                exoPlayer?.play()
+            }
+        } catch (e: Exception) {
             Log.e(TAG, "Error in play", e)
+        }
+    }
+
+    fun playOrPause(){
+        if (exoPlayer?.isPlaying == true){
+            isPausedByUser = true
+            exoPlayer?.pause()
+        } else {
+            isPausedByUser = false
+            exoPlayer?.play()
         }
     }
 

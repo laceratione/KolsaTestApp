@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -31,6 +32,8 @@ class WorkoutDetailsFragment : Fragment() {
     private val args: WorkoutDetailsFragmentArgs by navArgs()
     private var binding: FragmentWorkoutDetailsBinding? = null
 
+    private var playOrPauseBtn: Button? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         workoutDetailsVM.setWorkout(args.workout)
@@ -42,6 +45,10 @@ class WorkoutDetailsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentWorkoutDetailsBinding.inflate(inflater, container, false)
+        playOrPauseBtn = binding?.playerView?.findViewById(com.google.android.exoplayer2.ui.R.id.exo_play_pause)
+        playOrPauseBtn?.setOnClickListener { view ->
+            workoutDetailsVM.playOrPause()
+        }
         return binding?.root
     }
 
@@ -152,9 +159,15 @@ class WorkoutDetailsFragment : Fragment() {
             ?: Log.w(TAG, "qualityDialogBuilder null")
     }
 
+    override fun onResume() {
+        super.onResume()
+        workoutDetailsVM.play()
+    }
+
     override fun onStop() {
         super.onStop()
-        workoutDetailsVM.pause()
+        if (!requireActivity().isChangingConfigurations)
+            workoutDetailsVM.pauseOnHideApp()
     }
 
     override fun onDestroyView() {

@@ -84,8 +84,16 @@ class WorkoutDetailsViewModel @Inject constructor(
         videoPlayerManager.pause()
     }
 
+    fun pauseOnHideApp() {
+        videoPlayerManager.getPlayer()?.pause()
+    }
+
     fun play() {
         videoPlayerManager.play()
+    }
+
+    fun playOrPause(){
+        videoPlayerManager.playOrPause()
     }
 
     override fun onCleared() {
